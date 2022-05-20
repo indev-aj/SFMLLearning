@@ -23,7 +23,7 @@ void Game::initVariables()
 
 	// Game Logics
 	this->points = 0;
-	this->health = 10;
+	this->health = 20;
 	this->MAX_ENEMY_SPAWN_TIMER = 20.f;
 	this->enemySpawnTimer = MAX_ENEMY_SPAWN_TIMER;
 	this->MAX_ENEMIES = 5;
@@ -43,7 +43,6 @@ void Game::initEnemies()
 {
 	this->enemy.setPosition(10.f, 10.f);
 	this->enemy.setSize(sf::Vector2f(100.f, 100.f));
-	this->enemy.setScale(sf::Vector2f(0.5f, 0.5f));
 	this->enemy.setFillColor(sf::Color::Cyan);
 }
 
@@ -74,16 +73,6 @@ const bool Game::getEndGame() const
 }
 
 // Functions
-void Game::spawnEnemy()
-{
-	this->enemy.setPosition(
-		static_cast<float>(rand() % static_cast<int> (this->window->getSize().x - this->enemy.getSize().x)),
-		0.f
-	);
-
-	this->enemy.setFillColor(sf::Color::Green);
-	this->enemies.push_back(this->enemy);
-}
 
 void Game::pollEvents()
 {
@@ -124,6 +113,47 @@ void Game::renderText(sf::RenderTarget& target)
 	target.draw(this->uiText);
 }
 
+void Game::spawnEnemy()
+{
+	this->enemy.setPosition(
+		static_cast<float>(rand() % static_cast<int> (this->window->getSize().x - this->enemy.getSize().x)),
+		0.f
+	);
+
+	// Randomize enemy type
+	int type = rand() % 5;
+
+	switch (type)
+	{
+	case 0:
+		this->enemy.setSize(sf::Vector2f(29.f, 20.f));
+		this->enemy.setFillColor(sf::Color::Magenta);
+		break;
+	case 1:
+		this->enemy.setSize(sf::Vector2f(30.f, 30.f));
+		this->enemy.setFillColor(sf::Color::Blue);
+		break;
+	case 2:
+		this->enemy.setSize(sf::Vector2f(50.f, 50.f));
+		this->enemy.setFillColor(sf::Color::Red);
+		break;
+	case 3:
+		this->enemy.setSize(sf::Vector2f(70.f, 70.f));
+		this->enemy.setFillColor(sf::Color::Cyan);
+		break;
+	case 4:
+		this->enemy.setSize(sf::Vector2f(100.f, 100.f));
+		this->enemy.setFillColor(sf::Color::Green);
+		break;
+	default:
+		this->enemy.setSize(sf::Vector2f(100.f, 100.f));
+		this->enemy.setFillColor(sf::Color::Yellow);
+		break;
+	}
+		
+	this->enemies.push_back(this->enemy);
+}
+
 void Game::updateEnemies()
 {
 	// Update the timer for enemy spawning
@@ -157,13 +187,25 @@ void Game::updateEnemies()
 
 			for (size_t i = 0; i < enemies.size() && !deleted; i++) {
 				if (this->enemies[i].getGlobalBounds().contains(this->mousePosView)) {
+					// Gain points
+					if (this->enemies[i].getFillColor() == sf::Color::Magenta)
+						this->points += 10;
+					else if (this->enemies[i].getFillColor() == sf::Color::Blue)
+						this->points += 8;
+					else if (this->enemies[i].getFillColor() == sf::Color::Red)
+						this->points += 6;
+					else if (this->enemies[i].getFillColor() == sf::Color::Cyan)
+						this->points += 5;
+					else if (this->enemies[i].getFillColor() == sf::Color::Green)
+						this->points += 4;
+					else if (this->enemies[i].getFillColor() == sf::Color::Yellow)
+						this->points += 2;
+
+					std::cout << "Points: " << this->points << std::endl;
+					
 					// Delete enemy
 					deleted = true;
 					this->enemies.erase(this->enemies.begin() + i);
-
-					// Gain points
-					this->points += 5;
-					std::cout << "Points: " << this->points << std::endl;
 				}
 			}
 			this->mouseHeld = true;
@@ -171,6 +213,13 @@ void Game::updateEnemies()
 	}
 	else {
 		this->mouseHeld = false;
+	}
+}
+
+void Game::renderEnemies(sf::RenderTarget& target)
+{
+	for (auto& e : this->enemies) {
+		target.draw(e);
 	}
 }
 
@@ -187,13 +236,6 @@ void Game::update()
 	// End game condition
 	if (this->health <= 0)
 		this->endGame = true;
-}
-
-void Game::renderEnemies(sf::RenderTarget& target)
-{
-	for (auto& e : this->enemies) {
-		target.draw(e);
-	}
 }
 
 void Game::render()
