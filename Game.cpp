@@ -6,6 +6,8 @@ Game::Game()
 	this->initVariables();
 	this->initWindow();
 	this->initEnemies();
+	this->initFonts();
+	this->initTexts();
 }
 
 // Destructor
@@ -43,6 +45,21 @@ void Game::initEnemies()
 	this->enemy.setSize(sf::Vector2f(100.f, 100.f));
 	this->enemy.setScale(sf::Vector2f(0.5f, 0.5f));
 	this->enemy.setFillColor(sf::Color::Cyan);
+}
+
+void Game::initFonts()
+{
+	if (!this->font.loadFromFile("Fonts/Eatday.ttf")) {
+		std::cout << "ERROR::GAME::INITFONTS::Failed to load fonts!" << std::endl;
+	}
+}
+
+void Game::initTexts()
+{
+	this->uiText.setFont(this->font);
+	this->uiText.setCharacterSize(12);
+	this->uiText.setFillColor(sf::Color::White);
+	this->uiText.setString("UI Text");
 }
 
 // Accessors
@@ -91,6 +108,20 @@ void Game::updateMousePosition()
 {
 	this->mousePosWindow = sf::Mouse::getPosition(*this->window);
 	this->mousePosView = this->window->mapPixelToCoords(this->mousePosWindow);
+}
+
+void Game::updateText()
+{
+	std::stringstream ss;
+	ss << "Points: " << this->points << "\n"
+		<< "Health: " << this->health << "\n";
+
+	this->uiText.setString(ss.str());
+}
+
+void Game::renderText(sf::RenderTarget& target)
+{
+	target.draw(this->uiText);
 }
 
 void Game::updateEnemies()
@@ -149,6 +180,7 @@ void Game::update()
 
 	if (!this->endGame) {
 		this->updateMousePosition();
+		this->updateText();
 		this->updateEnemies();
 	}
 
@@ -157,10 +189,10 @@ void Game::update()
 		this->endGame = true;
 }
 
-void Game::renderEnemies()
+void Game::renderEnemies(sf::RenderTarget& target)
 {
 	for (auto& e : this->enemies) {
-		this->window->draw(e);
+		target.draw(e);
 	}
 }
 
@@ -169,8 +201,8 @@ void Game::render()
 	this->window->clear();
 
 	// Draw game objects
-	this->renderEnemies();
-
+	this->renderEnemies(*this->window);
+	this->renderText(*this->window);
 	this->window->display();
 }
 

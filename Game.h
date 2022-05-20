@@ -3,6 +3,8 @@
 #include <iostream>
 #include <vector>
 #include <ctime>
+#include <sstream>
+
 #include <SFML/Graphics.hpp>
 
 /// <summary>
@@ -26,6 +28,12 @@ private:
 	std::vector<sf::RectangleShape> enemies;
 	sf::RectangleShape enemy;
 
+	// Resources
+	sf::Font font;
+
+	// Text
+	sf::Text uiText;
+
 	// Game Logic
 	unsigned int points;
 	int health;
@@ -39,6 +47,8 @@ private:
 	void initVariables();
 	void initWindow();
 	void initEnemies();
+	void initFonts();
+	void initTexts();
 
 public:
 	// Constructor & Destructor
@@ -54,11 +64,15 @@ public:
 	void pollEvents();
 	void updateMousePosition();
 
-	void updateEnemies();
-	void update();
+	void updateText();
+	void renderText(sf::RenderTarget& target);
 
-	void renderEnemies();
+	void updateEnemies();
+	void renderEnemies(sf::RenderTarget& target);
+
+	void update();
 	void render();
+
 
 };
 
